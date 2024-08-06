@@ -1,31 +1,66 @@
 <script setup>
-  import { reactive, ref } from 'vue';
+  import { computed, reactive, ref } from 'vue';
   import AppAlert from './AppAlert.vue';
 
-  const nombre = ref('David')
+  // const nombre = ref('David')
   const alert = reactive({
     msg: '',
     type:''
   })
-  const paciente = reactive({
-    nombre: '',
-    propietario: '',
-    email: '',
-    alta: '',
-    sintomas: ''
+  
+  const props = defineProps({
+    id: {
+      type: [String, null],
+      required: true
+    },
+    nombre: {
+      type: String,
+      required: true
+    },
+    propietario: {
+      type: String,
+      required: true
+    },
+    email: {
+      type: String,
+      required: true
+    },
+    alta: {
+      type: String,
+      required: true
+    },
+    sintomas: {
+      type: String,
+      required: true
+    },
   })
+
+  const emits = defineEmits(['update:nombre','update:propietario','update:email','update:alta','update:sintomas','guardar-paciente'])
 
   const leerNombre = (e) => {
     nombre.value = e.target.value
   }
 
-  const mostrarInfo = () => {
-    if(Object.values(paciente).includes('')) {
+  const validar = () => {
+    
+    if(Object.values(props).includes('')) {
       alert.msg = "se tienen que rellenar todos los campos",
       alert.type= "error"
       return
     }
+    emits('guardar-paciente')
+    alert.msg = 'Se guardo exitosamente'
+    alert.type= 'succes' 
+
+    setTimeout(() => {
+      alert.msg = ''
+      alert.type= '' 
+    }, 3000);
   }
+
+  const editando = computed(() => {
+    return props.id
+  })
 
 </script>
 
@@ -41,9 +76,8 @@
     </p>
 
     <form
-      @submit.prevent="mostrarInfo"
+      @submit.prevent="validar"
       class="bg-white shadow-md py-10 px-5 rounded-lg mt-5">
-      
       <AppAlert 
         v-if="alert.msg"
         :alert = "alert"
@@ -93,7 +127,8 @@
           type="text" 
           id="nombre"
           placeholder="Nombre de la mascota"
-          v-model="paciente.nombre"
+          @input="$emit('update:nombre', $event.target.value )"
+          :value="nombre"
           class=" py-2 px-2 rounded-md w-full mt-2 border-2 placeholder:to-gray-800 ">
       </div>
 
@@ -107,7 +142,8 @@
           type="text" 
           id="propietario"
           placeholder="Nombre del propietario"
-          v-model="paciente.propietario"
+          @input="$emit('update:propietario', $event.target.value)"
+          :value="propietario"
           class=" py-2 px-2 rounded-md w-full mt-2 border-2 placeholder:to-gray-800 ">
       </div>
       
@@ -122,7 +158,8 @@
           type="email" 
           id="email"
           placeholder="usuario@email.com"
-          v-model="paciente.email"
+          @input="$emit('update:email',$event.target.value)"
+          :value="email"
           class=" py-2 px-2 rounded-md w-full mt-2 border-2 placeholder:to-gray-800 ">
       </div>
       
@@ -136,7 +173,8 @@
         <input 
           type="date" 
           id="alta"
-          v-model="paciente.alta"
+          @input="$emit('update:alta',$event.target.value)"
+          :value="alta"
           class=" py-2 px-2 rounded-md w-full mt-2 border-2 placeholder:to-gray-800 ">
       </div>
       
@@ -148,16 +186,14 @@
           Sintomas de la mascota
         </label>
         <textarea 
-          name="sintomas" 
           id="sintomas"
           placeholder="Sintomas de la mascota"
-          v-model="paciente.sintomas"
-          class=" py-2 px-2 rounded-md w-full mt-2 border-2 placeholder:to-gray-800 ">
-        </textarea>
+          @input="$emit('update:sintomas', $event.target.value)"
+          class=" py-2 px-2 rounded-md w-full mt-2 border-2 placeholder:to-gray-800 "/>
       </div>
       <input 
         type="submit" 
-        value="Registar paciente"
+        :value="[ editando ? 'Editar paciente' : 'Registar paciente']"
         class="bg-indigo-600 text-white w-full p-3 rounded-lg uppercase font-bold hover:bg-indigo-700 transition-colors cursor-pointer ">
     </form>
   </div>
